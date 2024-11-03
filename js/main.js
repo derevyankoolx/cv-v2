@@ -395,21 +395,116 @@ else{
 }
 });	
 
-//navi buttons
-$("#navi div").click(function() {
-if($(this).hasClass("activenav")){
-	return false;
+
+
+
+
+
+var cnt=0, texts=[];
+var $fclick = false;
+
+
+$(".imawhat").each(function() {
+  texts[cnt++]=$(this).text();
+});
+
+function fadeText() {
+  if (cnt>=texts.length) { cnt=0; }
+  $('.ima').html(texts[cnt++]);
+  $('.ima')
+    .fadeIn('fast').animate({opacity: 1.0}, 5000).fadeOut('fast',
+     function() {
+       return fadeText();
+     }
+  );
 }
-		
-	$("#navi div").removeClass("activenav");
-	$(".portfolio").removeClass('opened');
-	$(".portfolio").show();
-        $('.ombra').hide();
-		
-	var index = $("#navi div").index(this) + 1;
-	$("#img" + index).addClass('opened'); 
-    $(".portfolio").not("#img" + index).fadeOut("fast");
-    $("#img" + index).find('.ombra').fadeIn();
-        
-    $(this).addClass("activenav");
+
+function toggleForm() {
+  if ($fclick === true) {
+    $(".contact, .head, .arm").toggleClass("active inactive");
+  } else {
+    $(".contact, .head, .arm").addClass("active");
+    $fclick = true;
+  }
+}
+
+$(".contactme, .arrow, .closer, .submit").on("click", toggleForm);
+
+fadeText();
+
+
+var $formIsOpen = false;
+
+function toggleForm() {
+  if (!$formIsOpen) {
+    // Открываем форму
+    $(".contact, .head, .arm").addClass("active").removeClass("inactive");
+    $formIsOpen = true;
+  } else {
+    // Закрываем форму
+    $(".contact, .head, .arm").removeClass("active").addClass("inactive");
+    $formIsOpen = false;
+  }
+}
+
+// Привязываем клик к элементам для открытия и закрытия формы
+$(".contactme, .arrow").on("click", function() {
+  if (!$formIsOpen) {
+    toggleForm();
+  }
+});
+
+// Привязываем клик к кнопке закрытия формы
+$(".closer").on("click", function() {
+  if ($formIsOpen) {
+    toggleForm();
+  }
+});
+
+
+$("#contactForm").on("submit", function(e) {
+    e.preventDefault();
+
+    var token = "8039113348:AAFLSyrVcXd0dZ97xKZ-R68SIgtk7pvmycY"; // Вставьте ваш токен
+    var chat_id = "380077098"; // Вставьте ваш Chat ID
+    var message = "Имя: " + $("input[name='name']").val() + "\n" +
+                  "Email: " + $("input[name='email']").val() + "\n" +
+                  "Сообщение: " + $("textarea[name='message']").val();
+
+    $.ajax({
+        url: "https://api.telegram.org/bot" + token + "/sendMessage",
+        type: "POST",
+        data: {
+            chat_id: chat_id,
+            text: message
+        },
+        success: function(response) {
+            toggleForm(); // Закрываем форму
+            $(".abouttype").append('<p class="thank-you">Спасибо за ваше сообщение!</p>');
+        },
+        error: function() {
+            alert("Ошибка при отправке сообщения в Telegram.");
+        }
+    });
+});
+
+
+const switchInput = document.querySelector('.switch__input');
+const body = document.body;
+
+// Проверяем, есть ли сохраненная тема в localStorage
+if (localStorage.getItem('theme') === 'dark') {
+    body.classList.add('dark-mode');
+    switchInput.checked = true; // Устанавливаем переключатель в состояние "включен"
+}
+
+// Изменяем тему при переключении
+switchInput.addEventListener('change', () => {
+    if (switchInput.checked) {
+        body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark'); // Сохраняем тему в localStorage
+    } else {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light'); // Сохраняем тему в localStorage
+    }
 });
